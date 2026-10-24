@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TypeArena Online - English & Khmer Animated Multiplayer Typing</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts for Khmer & English -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600;700&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Outfit', 'Kantumruy Pro', sans-serif;
+            background-color: #030712;
+            color: #f3f4f6;
+            user-select: none;
+            overflow-x: hidden;
+        }
+
+        .khmer-font {
+            font-family: 'Kantumruy Pro', sans-serif;
+        }
+
+        /* Glassmorphism UI */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Neon Glow Effects */
+        .glow-cyan {
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
+        }
+        .glow-purple {
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+        }
+        .glow-red {
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+        }
+        .glow-amber {
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+        }
+
+        /* Animations */
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.03); }
+        }
+        .animate-pulse-glow {
+            animation: pulse-glow 2s infinite ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translate(0, 0); }
+            20% { transform: translate(-6px, 4px); }
+            40% { transform: translate(6px, -4px); }
+            60% { transform: translate(-4px, -2px); }
+            80% { transform: translate(4px, 2px); }
+        }
+        .screen-shake {
+            animation: shake 0.25s ease-in-out;
+        }
+
+        /* Word character formatting */
+        .char-correct {
+            color: #10b981;
+            text-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+        }
+        .char-wrong {
+            color: #ef4444;
+            background-color: rgba(239, 68, 68, 0.25);
+            border-radius: 3px;
+        }
+        .char-untyped {
+            color: #6b7280;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-2 md:p-5 bg-slate-950 text-slate-100">
+
+    <!-- TOP HEADER / NAV BAR -->
+    <header class="w-full max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 p-4 glass-panel rounded-2xl border border-slate-800 shadow-2xl mb-4 z-20">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-gradient-to-tr from-cyan-500 via-indigo-600 to-purple-600 rounded-xl flex items-center justify-center text-2xl text-white shadow-lg glow-cyan">
+                <i class="fa-solid fa-gamepad"></i>
+            </div>
+            <div>
+                <h1 class="text-2xl md:text-3xl font-black tracking-wider bg-gradient-to-r from-cyan-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
+                    TYPEARENA <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 font-bold">ONLINE</span>
+                </h1>
+                <p class="text-xs text-slate-400 flex items-center gap-2">
+                    <span class="khmer-font">ល្បែងវាយអក្សរតាមអ៊ីនធឺណិត</span> • <span id="currentLangBadge" class="text-cyan-400 font-semibold">ENGLISH</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- USER PROFILE & CONTROLS -->
+        <div class="flex flex-wrap items-center gap-3">
+            <!-- User Status Card -->
+            <div id="userProfileBar" class="flex items-center gap-3 bg-slate-900/90 border border-slate-800 px-3 py-1.5 rounded-xl cursor-pointer hover:border-slate-700 transition" onclick="openAuthModal()">
+                <img id="userHeaderAvatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=Warrior" class="w-9 h-9 rounded-lg bg-slate-800 border border-cyan-500/50" alt="Avatar">
+                <div class="text-left">
+                    <div id="userHeaderName" class="text-sm font-bold text-white flex items-center gap-2">
+                        Guest Player <span id="userHeaderLevel" class="text-[10px] bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 px-1.5 py-0.2 rounded">Lvl 1</span>
+                    </div>
+                    <div id="userHeaderStats" class="text-[11px] text-slate-400">Best: 0 WPM • Exp: 0</div>
+                </div>
+                <i class="fa-solid fa-right-to-bracket text-slate-400 text-xs ml-1"></i>
+            </div>
+
+            <!-- Language Toggle -->
+            <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
+                <button id="langEnBtn" onclick="setLanguage('en')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-cyan-600 text-white shadow-md">
+                    🇬🇧 EN
+                </button>
+                <button id="langKmBtn" onclick="setLanguage('km')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white khmer-font">
+                    🇰🇭 ខ្មែរ
+                </button>
+            </div>
+
+            <!-- Audio Toggle -->
+            <button id="audioToggleBtn" onclick="toggleAudio()" class="p-2.5 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-xl border border-slate-800 transition">
+                <i id="audioIcon" class="fa-solid fa-volume-high text-cyan-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main id="mainContainer" class="w-full max-w-7xl mx-auto flex-1 flex flex-col items-center justify-center relative">
+
+        <!-- GAME MODE SELECTOR TABS -->
+        <nav class="w-full grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+            <button onclick="switchMode('solo')" id="tab-solo" class="mode-tab flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-cyan-500/50 bg-cyan-950/40 text-cyan-400 font-bold text-sm sm:text-base transition-all hover:bg-cyan-900/50 glow-cyan">
+                <i class="fa-solid fa-user-ninja"></i>
+                <span data-en="Solo Practice" data-km="ហាត់ម្នាក់ឯង">Solo Practice</span>
+            </button>
+            <button onclick="switchMode('zombie')" id="tab-zombie" class="mode-tab flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-slate-800 bg-slate-900/60 text-slate-400 font-bold text-sm sm:text-base transition-all hover:bg-slate-800">
+                <i class="fa-solid fa-biohazard text-emerald-400"></i>
+                <span data-en="Zombie Defense" data-km="វាយហ្វូងហ្សូមប៊ី">Zombie Defense</span>
+            </button>
+            <button onclick="switchMode('boss')" id="tab-boss" class="mode-tab flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-slate-800 bg-slate-900/60 text-slate-400 font-bold text-sm sm:text-base transition-all hover:bg-slate-800">
+                <i class="fa-solid fa-dragon text-red-500"></i>
+                <span data-en="Boss Fight" data-km="ប្រយុទ្ធជាមួយមេ">Boss Fight</span>
+            </button>
+            <button onclick="switchMode('multiplayer')" id="tab-multiplayer" class="mode-tab flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-slate-800 bg-slate-900/60 text-slate-400 font-bold text-sm sm:text-base transition-all hover:bg-slate-800">
+                <i class="fa-solid fa-users text-amber-400"></i>
+                <span data-en="Multiplayer Lobby" data-km="លេងអនឡាញ">Multiplayer Lobby</span>
+            </button>
+        </nav>
+
+        <!-- CANVAS & GAME ENGINE WINDOW -->
+        <div id="gameWindow" class="relative w-full glass-panel border border-slate-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col items-center">
+
+            <!-- STATS / HUD BAR -->
+            <div class="w-full bg-slate-950/90 px-6 py-3 border-b border-slate-800/80 flex flex-wrap justify-between items-center gap-4 text-xs sm:text-sm font-semibold z-10">
+                <div class="flex items-center gap-6">
+                    <div class="flex items-center gap-2 text-cyan-400">
+                        <i class="fa-solid fa-bolt"></i>
+                        <span>WPM: <strong id="statWpm" class="text-white text-base">0</strong></span>
+                    </div>
+                    <div class="flex items-center gap-2 text-emerald-400">
+                        <i class="fa-solid fa-bullseye"></i>
+                        <span>Accuracy: <strong id="statAcc" class="text-white text-base">100%</strong></span>
+                    </div>
+                    <div class="flex items-center gap-2 text-amber-400">
+                        <i class="fa-solid fa-fire"></i>
+                        <span>Combo: <strong id="statCombo" class="text-white text-base">0x</strong></span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2 text-purple-400">
+                        <i class="fa-solid fa-trophy"></i>
+                        <span>Score: <strong id="statScore" class="text-white text-base">0</strong></span>
+                    </div>
+                    <div class="flex items-center gap-2 text-rose-400">
+                        <i class="fa-solid fa-stopwatch"></i>
+                        <span>Time: <strong id="statTimer" class="text-white text-base">60s</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CANVAS SCREEN -->
+            <div id="canvasContainer" class="relative w-full h-[360px] sm:h-[420px] bg-slate-950 flex justify-center items-center overflow-hidden">
+                <canvas id="gameCanvas" class="w-full h-full block"></canvas>
+
+                <!-- MULTIPLAYER LOBBY OVERLAY PANEL -->
+                <div id="multiplayerLobbyPanel" class="hidden absolute inset-0 bg-slate-950/95 backdrop-blur-md p-6 z-20 flex flex-col">
+                    <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-800">
+                        <div>
+                            <h2 class="text-xl font-black text-amber-400 flex items-center gap-2">
+                                <i class="fa-solid fa-globe"></i>
+                                <span data-en="ONLINE MULTIPLAYER ROOMS" data-km="បន្ទប់លេងអនឡាញ">ONLINE MULTIPLAYER ROOMS</span>
+                            </h2>
+                            <p class="text-xs text-slate-400" data-en="Create or join 1v1 up to 5v5 team typing battles" data-km="បង្កើត ឬ ចូលរួមបន្ទប់ប្រកួតពី 1v1 ដល់ 5v5">Create or join 1v1 up to 5v5 team typing battles</p>
+                        </div>
+                        <button onclick="openCreateRoomModal()" class="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-black rounded-xl text-xs shadow-lg flex items-center gap-2 transition">
+                            <i class="fa-solid fa-plus"></i>
+                            <span data-en="CREATE ROOM" data-km="បង្កើតបន្ទប់">CREATE ROOM</span>
+                        </button>
+                    </div>
+
+                    <!-- Room List Container -->
+                    <div id="roomListContainer" class="flex-1 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-3 pr-1">
+                        <!-- Dynamic Rooms Render Here -->
+                    </div>
+                </div>
+
+                <!-- ROOM WAITING LOBBY OVERLAY -->
+                <div id="roomWaitingOverlay" class="hidden absolute inset-0 bg-slate-950/95 backdrop-blur-md p-6 z-25 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+                            <div>
+                                <h3 id="roomWaitingTitle" class="text-xl font-bold text-cyan-400">Room: Arena #101</h3>
+                                <p id="roomWaitingSub" class="text-xs text-slate-400">Mode: Team Battle (2v2) • Language: English</p>
+                            </div>
+                            <button onclick="leaveRoom()" class="px-3 py-1.5 bg-rose-600/30 text-rose-400 border border-rose-500/40 rounded-lg text-xs font-bold hover:bg-rose-600 hover:text-white transition">
+                                <i class="fa-solid fa-door-open"></i> Leave
+                            </button>
+                        </div>
+
+                        <!-- Player Slots Grid -->
+                        <div id="roomPlayerSlots" class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">
+                            <!-- Slots Rendered dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Ready / Start controls -->
+                    <div class="flex justify-between items-center bg-slate-900 p-4 rounded-xl border border-slate-800">
+                        <span id="roomStatusText" class="text-xs text-amber-400 animate-pulse font-bold">Waiting for players to join...</span>
+                        <button id="roomStartBtn" onclick="startMultiplayerMatch()" class="px-8 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-xl text-sm shadow-lg transition">
+                            START MATCH
+                        </button>
+                    </div>
+                </div>
+
+                <!-- START OVERLAY -->
+                <div id="startOverlay" class="absolute inset-0 bg-slate-950/90 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center z-15">
+                    <div class="w-20 h-20 bg-gradient-to-tr from-cyan-500 to-indigo-600 rounded-3xl flex items-center justify-center text-4xl text-white shadow-xl shadow-cyan-500/20 mb-4 animate-pulse-glow">
+                        <i id="modeIconLarge" class="fa-solid fa-keyboard"></i>
+                    </div>
+                    <h2 id="modeTitle" class="text-2xl sm:text-3xl font-extrabold text-white mb-2">Solo Practice Mode</h2>
+                    <p id="modeDesc" class="text-slate-400 text-sm max-w-md mb-6">Test your speed and accuracy with clean sentences and words in your chosen language.</p>
+                    <button onclick="startGame()" class="px-8 py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-extrabold rounded-xl shadow-lg shadow-cyan-500/30 transition transform hover:scale-105 active:scale-95 flex items-center gap-3 text-lg">
+                        <i class="fa-solid fa-play"></i>
+                        <span data-en="START GAME" data-km="ចាប់ផ្តើមលេង">START GAME</span>
+                    </button>
+                </div>
+
+                <!-- GAME OVER / RESULTS OVERLAY -->
+                <div id="gameOverOverlay" class="hidden absolute inset-0 bg-slate-950/95 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center z-30">
+                    <div id="endResultBadge" class="w-20 h-20 bg-emerald-500/20 border border-emerald-500/50 rounded-full flex items-center justify-center text-4xl text-emerald-400 mb-4">
+                        <i id="endResultIcon" class="fa-solid fa-trophy"></i>
+                    </div>
+                    <h2 id="endResultTitle" class="text-3xl font-black text-white mb-1">VICTORY!</h2>
+                    <p id="endResultSub" class="text-slate-400 text-sm mb-6">Great job typing! Here are your final statistics:</p>
+
+                    <!-- Stats Cards -->
+                    <div class="grid grid-cols-3 gap-3 w-full max-w-md mb-6">
+                        <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl">
+                            <span class="text-xs text-slate-500 block" data-en="WPM" data-km="ពាក្យ/នាទី">WPM</span>
+                            <span id="finalWpm" class="text-2xl font-black text-cyan-400">0</span>
+                        </div>
+                        <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl">
+                            <span class="text-xs text-slate-500 block" data-en="ACCURACY" data-km="ភាពត្រឹមត្រូវ">ACCURACY</span>
+                            <span id="finalAcc" class="text-2xl font-black text-emerald-400">0%</span>
+                        </div>
+                        <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl">
+                            <span class="text-xs text-slate-500 block" data-en="SCORE" data-km="ពិន្ទុ">SCORE</span>
+                            <span id="finalScore" class="text-2xl font-black text-amber-400">0</span>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4">
+                        <button onclick="startGame()" class="px-6 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl shadow-lg transition flex items-center gap-2">
+                            <i class="fa-solid fa-rotate-right"></i>
+                            <span data-en="Play Again" data-km="លេងម្តងទៀត">Play Again</span>
+                        </button>
+                        <button onclick="closeGameOver()" class="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl border border-slate-700 transition">
+                            <span data-en="Change Mode" data-km="ប្តូរវគ្គ">Change Mode</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TARGET TEXT & TYPING INPUT BOX -->
+            <div class="w-full bg-slate-900 border-t border-slate-800/80 p-4 sm:p-6 flex flex-col items-center gap-4">
+                <div class="w-full max-w-2xl bg-slate-950 border border-slate-800 rounded-xl p-4 text-center min-h-[70px] flex items-center justify-center shadow-inner">
+                    <div id="wordTargetDisplay" class="text-xl sm:text-2xl md:text-3xl font-bold tracking-wide break-words">
+                        <span class="text-slate-600 italic text-sm sm:text-base" data-en="Press Start Game to begin..." data-km="ចុច ចាប់ផ្តើមលេង ដើម្បីចាប់ផ្តើម...">Press Start Game to begin...</span>
+                    </div>
+                </div>
+
+                <div class="w-full max-w-2xl relative">
+                    <input type="text" id="typingInput" disabled autocomplete="off" spellcheck="false" placeholder="Type here..." 
+                           class="w-full bg-slate-950 border-2 border-slate-700 focus:border-cyan-500 rounded-xl px-5 py-3.5 text-lg sm:text-xl font-medium text-white placeholder-slate-600 outline-none transition shadow-lg text-center" />
+                    <div class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-600 text-sm flex items-center gap-1">
+                        <i class="fa-solid fa-keyboard"></i>
+                        <span class="text-xs hidden sm:inline" data-en="TYPE WORD" data-km="វាយពាក្យ">TYPE WORD</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- AUTHENTICATION / USER PROFILE MODAL -->
+    <div id="authModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl relative">
+            <button onclick="closeAuthModal()" class="absolute right-4 top-4 text-slate-500 hover:text-white text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h2 class="text-xl font-black text-white mb-1 flex items-center gap-2">
+                <i class="fa-solid fa-user-circle text-cyan-400"></i> Player Login & Profile
+            </h2>
+            <p class="text-xs text-slate-400 mb-6">Enter your name, password and select an avatar icon.</p>
+
+            <form onsubmit="handleAuthSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="text-xs font-bold text-slate-300 block mb-1">Username / Nickname</label>
+                    <input type="text" id="authUsername" required placeholder="e.g. KhmerTypist" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-cyan-500" />
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-300 block mb-1">Password</label>
+                    <input type="password" id="authPassword" required placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-cyan-500" />
+                </div>
+
+                <!-- Avatar Preset Selection -->
+                <div>
+                    <label class="text-xs font-bold text-slate-300 block mb-1">Select Avatar Logo</label>
+                    <div id="avatarOptions" class="flex gap-3 overflow-x-auto py-2">
+                        <!-- Avatars dynamically generated -->
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg transition">
+                    Save Profile & Login
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- CREATE MULTIPLAYER ROOM MODAL -->
+    <div id="createRoomModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl relative">
+            <button onclick="closeCreateRoomModal()" class="absolute right-4 top-4 text-slate-500 hover:text-white text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h2 class="text-xl font-black text-white mb-1 flex items-center gap-2">
+                <i class="fa-solid fa-plus-circle text-amber-400"></i> Create Multiplayer Room
+            </h2>
+            <p class="text-xs text-slate-400 mb-6">Setup team size and target language.</p>
+
+            <form onsubmit="handleCreateRoomSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="text-xs font-bold text-slate-300 block mb-1">Room Name</label>
+                    <input type="text" id="roomNameInput" required placeholder="e.g. Phnom Penh Champions" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-amber-500" />
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-300 block mb-1">Team Battle Mode</label>
+                    <select id="roomTeamModeSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-amber-500">
+                        <option value="1v1">1 vs 1 Match</option>
+                        <option value="2v2">2 vs 2 Team Battle</option>
+                        <option value="3v3">3 vs 3 Team Battle</option>
+                        <option value="5v5">5 vs 5 Giant Arena</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-300 block mb-1">Language</label>
+                    <select id="roomLangSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-amber-500">
+                        <option value="en">English Vocabulary</option>
+                        <option value="km">ភាសាខ្មែរ (Khmer)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl shadow-lg transition">
+                    CREATE & ENTER LOBBY
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- FIREBASE MODULES -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Config setup
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'typearena-online';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "dummy",
+            authDomain: "dummy.firebaseapp.com",
+            projectId: "dummy",
+            storageBucket: "dummy.appspot.com",
+            messagingSenderId: "123",
+            appId: "123"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        window.fbAuth = auth;
+        window.fbDb = db;
+        window.fbAppId = appId;
+
+        // Initialize Authentication
+        async function initAuth() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.warn("Auth fallback mode enabled:", err);
+            }
+        }
+        initAuth();
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.currentUser = user;
+                listenToRooms();
+            }
+        });
+
+        // Realtime Room Listener
+        function listenToRooms() {
+            const roomsCol = collection(db, 'artifacts', appId, 'public', 'data', 'rooms');
+            onSnapshot(roomsCol, (snapshot) => {
+                const rooms = [];
+                snapshot.forEach(docSnap => {
+                    rooms.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                if (window.renderRoomList) window.renderRoomList(rooms);
+            }, (error) => {
+                console.warn("Snapshot notice:", error);
+            });
+        }
+    </script>
+
+    <!-- GAME LOGIC SCRIPT -->
+    <script>
+        // ==========================================
+        // 1. DICTIONARIES & WORD LISTS
+        // ==========================================
+        const WORD_LISTS = {
+            en: [
+                "warrior", "keyboard", "lightning", "victory", "champion", "zombie",
+                "castle", "shield", "sword", "dragon", "courage", "defend", "attack", "speed",
+                "typing", "hero", "battle", "legend", "shadow", "future", "digital", "network",
+                "computer", "arcade", "challenge", "power", "magic", "spirit", "conquer",
+                "the brave warrior strikes with immense power",
+                "defend the kingdom from incoming wave of monsters",
+                "practice typing every day to master speed and precision",
+                "unity and teamwork bring victory in every arena match"
+            ],
+            km: [
+                "សួស្តី", "ស្រឡាញ់", "កម្ពុជា", "សន្តិភាព", "ប្រាសាទ", "រៀន", "ជោគជ័យ", "អាហារ",
+                "ទឹក", "មិត្តភក្តិ", "គ្រួសារ", "ពិភពលោក", "អង្គរវត្ត", "ជំនាញ", "អនាគត", "ចំណេះដឹង",
+                "ក្លាហាន", "ជ័យជំនះ", "វីរជន", "ភាសាខ្មែរ", "អក្សរសាស្ត្រ", "វប្បធម៌", "សាមគ្គី",
+                "ការតស៊ូនាំឲ្យសម្រេចជោគជ័យ", "ប្រទេសកម្ពុជាមានប្រាសាទបុរាណជាច្រើន",
+                "ការរៀនសូត្រគឺជាពន្លឺនៃជីវិត", "មិត្តភាពពិតប្រាកដមានតម្លៃមហាសាល",
+                "សូមស្វាគមន៍មកកាន់ល្បែងវាយអត្ថបទ"
+            ]
+        };
+
+        const TRANSLATIONS = {
+            en: {
+                currentLang: "ENGLISH",
+                soloTitle: "Solo Practice Mode",
+                soloDesc: "Test your speed and accuracy with clean sentences and words in your chosen language.",
+                zombieTitle: "Zombie Defense Mode",
+                zombieDesc: "Defend your fortress! Type words to fire magic laser beams and slay zombies before they reach you.",
+                bossTitle: "Boss Fight Mode",
+                bossDesc: "A giant Boss approaches! Type words rapidly to unleash powerful spell strikes before time runs out.",
+                multiTitle: "Multiplayer Arena Lobby",
+                multiDesc: "Join online rooms to play 1v1 up to 5v5 team battles with live opponent tracking.",
+                victoryTitle: "VICTORY!",
+                defeatTitle: "DEFEAT!",
+                victorySub: "Great job typing! Here are your final statistics:",
+                defeatSub: "You were overwhelmed! Practice more and try again."
+            },
+            km: {
+                currentLang: "ភាសាខ្មែរ",
+                soloTitle: "វគ្គហាត់ម្នាក់ឯង",
+                soloDesc: "សាកល្បងល្បឿន និងភាពត្រឹមត្រូវរបស់អ្នកជាមួយនឹងពាក្យ ឬល្បះគំរូ។",
+                zombieTitle: "វគ្គវាយហ្វូងហ្សូមប៊ី",
+                zombieDesc: "ការពារបន្ទាយរបស់អ្នក! វាយពាក្យដើម្បីបាញ់បាល់ឡាស៊ែរកម្ទេចហ្សូមប៊ីមុនពេលមកដល់អ្នក។",
+                bossTitle: "វគ្គប្រយុទ្ធជាមួយមេ",
+                bossDesc: "មេចក្សត្រដ៏ធំបានបង្ហាញខ្លួន! វាយពាក្យឲ្យលឿនដើម្បីបាញ់បាល់ភ្លើងកម្ទេចមេមុនអស់ពេល។",
+                multiTitle: "បន្ទប់ប្រកួតអនឡាញ",
+                multiDesc: "ចូលរួមបន្ទប់អនឡាញដើម្បីប្រកួតជាក្រុមពី 1v1 ដល់ 5v5 ជាមួយអ្នកលេងផ្សេងទៀត។",
+                victoryTitle: "ជ័យជំនះ!",
+                defeatTitle: "បរាជ័យ!",
+                victorySub: "ធ្វើបានល្អណាស់! នេះជាស្ថិតិចុងក្រោយរបស់អ្នក៖",
+                defeatSub: "អ្នកត្រូវរងការវាយប្រហារ! ព្យាយាមហាត់បន្ថែមទៀត។"
+            }
+        };
+
+        // ==========================================
+        // 2. GLOBAL STATE
+        // ==========================================
+        let currentLang = 'en';
+        let currentMode = 'solo';
+        let isGameRunning = false;
+        let soundEnabled = true;
+
+        // User Profile
+        let userProfile = {
+            name: 'Guest Player',
+            password: '',
+            avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Warrior',
+            level: 1,
+            exp: 0,
+            bestWpm: 0
+        };
+
+        const AVATARS = [
+            'https://api.dicebear.com/7.x/bottts/svg?seed=Warrior',
+            'https://api.dicebear.com/7.x/bottts/svg?seed=Cyber',
+            'https://api.dicebear.com/7.x/bottts/svg?seed=Dragon',
+            'https://api.dicebear.com/7.x/bottts/svg?seed=Phoenix',
+            'https://api.dicebear.com/7.x/bottts/svg?seed=Ninja'
+        ];
+
+        // Stats
+        let score = 0;
+        let combo = 0;
+        let totalTypedChars = 0;
+        let correctTypedChars = 0;
+        let startTime = 0;
+        let timerInterval = null;
+        let timeLeft = 60;
+
+        // Game Target Word
+        let currentTargetWord = "";
+
+        // Canvas Entities & Visual FX
+        let zombies = [];
+        let particles = [];
+        let floatingTexts = [];
+        let lasers = [];
+        let boss = null;
+        let currentRoom = null;
+
+        // DOM Handles
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const typingInput = document.getElementById('typingInput');
+        const wordTargetDisplay = document.getElementById('wordTargetDisplay');
+
+        const statWpm = document.getElementById('statWpm');
+        const statAcc = document.getElementById('statAcc');
+        const statCombo = document.getElementById('statCombo');
+        const statScore = document.getElementById('statScore');
+        const statTimer = document.getElementById('statTimer');
+
+        const startOverlay = document.getElementById('startOverlay');
+        const gameOverOverlay = document.getElementById('gameOverOverlay');
+
+        // ==========================================
+        // 3. AUDIO SYNTHESIZER
+        // ==========================================
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                const now = audioCtx.currentTime;
+
+                if (type === 'key') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(500, now);
+                    osc.frequency.exponentialRampToValueAtTime(900, now + 0.04);
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.04);
+                    osc.start(now);
+                    osc.stop(now + 0.04);
+                } else if (type === 'hit') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(250, now);
+                    osc.frequency.exponentialRampToValueAtTime(60, now + 0.15);
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                    osc.start(now);
+                    osc.stop(now + 0.15);
+                } else if (type === 'laser') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(800, now);
+                    osc.frequency.exponentialRampToValueAtTime(150, now + 0.1);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                    osc.start(now);
+                    osc.stop(now + 0.1);
+                } else if (type === 'victory') {
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.1);
+                    osc.frequency.setValueAtTime(783.99, now + 0.2);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                } else if (type === 'error') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(160, now);
+                    osc.frequency.setValueAtTime(110, now + 0.08);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+                    osc.start(now);
+                    osc.stop(now + 0.12);
+                }
+            } catch (e) {}
+        }
+
+        function toggleAudio() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('audioIcon').className = soundEnabled ? 'fa-solid fa-volume-high text-cyan-400' : 'fa-solid fa-volume-xmark text-slate-500';
+        }
+
+        // ==========================================
+        // 4. CANVAS RESIZE & SETUP
+        // ==========================================
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // ==========================================
+        // 5. USER AUTH & PROFILE LOGIC
+        // ==========================================
+        function openAuthModal() {
+            document.getElementById('authModal').classList.remove('hidden');
+            renderAvatarOptions();
+        }
+        function closeAuthModal() {
+            document.getElementById('authModal').classList.add('hidden');
+        }
+
+        function renderAvatarOptions() {
+            const container = document.getElementById('avatarOptions');
+            container.innerHTML = AVATARS.map((url) => `
+                <img src="${url}" onclick="selectAvatar('${url}')" 
+                     class="w-12 h-12 rounded-xl bg-slate-950 border-2 ${userProfile.avatar === url ? 'border-cyan-400 scale-105' : 'border-slate-800'} cursor-pointer hover:border-cyan-500 transition p-1" />
+            `).join('');
+        }
+
+        function selectAvatar(url) {
+            userProfile.avatar = url;
+            renderAvatarOptions();
+        }
+
+        function handleAuthSubmit(e) {
+            e.preventDefault();
+            userProfile.name = document.getElementById('authUsername').value || 'Guest Player';
+            userProfile.password = document.getElementById('authPassword').value;
+
+            document.getElementById('userHeaderName').childNodes[0].nodeValue = userProfile.name + ' ';
+            document.getElementById('userHeaderAvatar').src = userProfile.avatar;
+
+            closeAuthModal();
+        }
+
+        // ==========================================
+        // 6. LANGUAGE & MODE SELECTION
+        // ==========================================
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.getElementById('currentLangBadge').textContent = lang === 'en' ? 'ENGLISH' : 'ភាសាខ្មែរ';
+
+            const enBtn = document.getElementById('langEnBtn');
+            const kmBtn = document.getElementById('langKmBtn');
+
+            if (lang === 'en') {
+                enBtn.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-cyan-600 text-white shadow-md";
+                kmBtn.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white khmer-font";
+            } else {
+                kmBtn.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-cyan-600 text-white shadow-md khmer-font";
+                enBtn.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white";
+            }
+
+            document.querySelectorAll('[data-en]').forEach(el => {
+                el.textContent = el.getAttribute(`data-${lang}`);
+            });
+
+            updateModeUI();
+            if (!isGameRunning) setNextWordTarget();
+        }
+
+        function switchMode(mode) {
+            if (isGameRunning) endGame(false);
+            currentMode = mode;
+
+            document.querySelectorAll('.mode-tab').forEach(tab => {
+                tab.className = "mode-tab flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-slate-800 bg-slate-900/60 text-slate-400 font-bold text-sm sm:text-base transition-all hover:bg-slate-800";
+            });
+
+            const activeTab = document.getElementById(`tab-${mode}`);
+            activeTab.className = "mode-tab flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-cyan-500/50 bg-cyan-950/40 text-cyan-400 font-bold text-sm sm:text-base transition-all hover:bg-cyan-900/50 glow-cyan";
+
+            const multiLobby = document.getElementById('multiplayerLobbyPanel');
+            if (mode === 'multiplayer') {
+                multiLobby.classList.remove('hidden');
+            } else {
+                multiLobby.classList.add('hidden');
+            }
+
+            updateModeUI();
+            startOverlay.classList.remove('hidden');
+            gameOverOverlay.classList.add('hidden');
+        }
+
+        function updateModeUI() {
+            const t = TRANSLATIONS[currentLang];
+            const icon = document.getElementById('modeIconLarge');
+            const title = document.getElementById('modeTitle');
+            const desc = document.getElementById('modeDesc');
+
+            if (currentMode === 'solo') {
+                icon.className = "fa-solid fa-user-ninja";
+                title.textContent = t.soloTitle;
+                desc.textContent = t.soloDesc;
+            } else if (currentMode === 'zombie') {
+                icon.className = "fa-solid fa-biohazard text-emerald-400";
+                title.textContent = t.zombieTitle;
+                desc.textContent = t.zombieDesc;
+            } else if (currentMode === 'boss') {
+                icon.className = "fa-solid fa-dragon text-red-500";
+                title.textContent = t.bossTitle;
+                desc.textContent = t.bossDesc;
+            } else if (currentMode === 'multiplayer') {
+                icon.className = "fa-solid fa-users text-amber-400";
+                title.textContent = t.multiTitle;
+                desc.textContent = t.multiDesc;
+            }
+        }
+
+        // ==========================================
+        // 7. MULTIPLAYER ROOM SYSTEM (FIREBASE)
+        // ==========================================
+        function openCreateRoomModal() {
+            document.getElementById('createRoomModal').classList.remove('hidden');
+        }
+        function closeCreateRoomModal() {
+            document.getElementById('createRoomModal').classList.add('hidden');
+        }
+
+        async function handleCreateRoomSubmit(e) {
+            e.preventDefault();
+            if (!window.fbDb) return;
+
+            const name = document.getElementById('roomNameInput').value;
+            const teamMode = document.getElementById('roomTeamModeSelect').value;
+            const lang = document.getElementById('roomLangSelect').value;
+
+            const roomRef = doc(window.fbDb, 'artifacts', window.fbAppId, 'public', 'data', 'rooms', 'room_' + Date.now());
+            const newRoom = {
+                name: name,
+                teamMode: teamMode,
+                lang: lang,
+                status: 'waiting',
+                players: [{
+                    name: userProfile.name,
+                    avatar: userProfile.avatar,
+                    wpm: 0,
+                    ready: true
+                }]
+            };
+
+            await setDoc(roomRef, newRoom);
+            closeCreateRoomModal();
+            enterRoom(newRoom);
+        }
+
+        window.renderRoomList = function(rooms) {
+            const container = document.getElementById('roomListContainer');
+            if (rooms.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-500 col-span-2 text-center py-8">No online rooms available. Click Create Room to start one!</p>`;
+                return;
+            }
+
+            container.innerHTML = rooms.map(r => `
+                <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl flex justify-between items-center hover:border-cyan-500/50 transition">
+                    <div>
+                        <div class="text-sm font-bold text-white flex items-center gap-2">
+                            ${r.name} 
+                            <span class="text-[10px] bg-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded border border-cyan-500/30 font-bold">${r.teamMode}</span>
+                        </div>
+                        <div class="text-xs text-slate-400">${r.lang === 'en' ? 'English' : 'ភាសាខ្មែរ'} • Players: ${r.players ? r.players.length : 1}</div>
+                    </div>
+                    <button onclick="joinRoom('${r.id}')" class="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-xs font-bold transition">
+                        JOIN
+                    </button>
+                </div>
+            `).join('');
+        };
+
+        function joinRoom(roomId) {
+            const mockRoom = {
+                id: roomId,
+                name: "Arena Room",
+                teamMode: "2v2",
+                lang: currentLang,
+                players: [
+                    { name: "Leader", avatar: AVATARS[1], wpm: 0 },
+                    { name: userProfile.name, avatar: userProfile.avatar, wpm: 0 }
+                ]
+            };
+            enterRoom(mockRoom);
+        }
+
+        function enterRoom(room) {
+            currentRoom = room;
+            document.getElementById('roomWaitingOverlay').classList.remove('hidden');
+            document.getElementById('roomWaitingTitle').textContent = `Room: ${room.name}`;
+            document.getElementById('roomWaitingSub').textContent = `Mode: ${room.teamMode} • Language: ${room.lang === 'en' ? 'English' : 'ភាសាខ្មែរ'}`;
+
+            const slots = document.getElementById('roomPlayerSlots');
+            slots.innerHTML = room.players.map(p => `
+                <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl flex flex-col items-center text-center">
+                    <img src="${p.avatar}" class="w-10 h-10 rounded-lg border border-cyan-500/50 mb-2">
+                    <span class="text-xs font-bold text-white truncate w-full">${p.name}</span>
+                    <span class="text-[10px] text-emerald-400 mt-1"><i class="fa-solid fa-check"></i> Ready</span>
+                </div>
+            `).join('');
+        }
+
+        function leaveRoom() {
+            document.getElementById('roomWaitingOverlay').classList.add('hidden');
+            currentRoom = null;
+        }
+
+        function startMultiplayerMatch() {
+            leaveRoom();
+            document.getElementById('multiplayerLobbyPanel').classList.add('hidden');
+            startGame();
+        }
+
+        // ==========================================
+        // 8. GAME LOOP & ANIMATION ENGINE
+        // ==========================================
+        function startGame() {
+            startOverlay.classList.add('hidden');
+            gameOverOverlay.classList.add('hidden');
+
+            isGameRunning = true;
+            score = 0;
+            combo = 0;
+            totalTypedChars = 0;
+            correctTypedChars = 0;
+            timeLeft = 60;
+            startTime = Date.now();
+
+            typingInput.disabled = false;
+            typingInput.value = '';
+            typingInput.focus();
+
+            zombies = [];
+            particles = [];
+            floatingTexts = [];
+            lasers = [];
+
+            if (currentMode === 'zombie') {
+                spawnZombie();
+            } else if (currentMode === 'boss') {
+                boss = { maxHp: 200, hp: 200, x: canvas.width * 0.75, y: canvas.height * 0.4, shake: 0 };
+            }
+
+            setNextWordTarget();
+            updateStatsUI();
+
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (!isGameRunning) return;
+                timeLeft--;
+                statTimer.textContent = `${timeLeft}s`;
+
+                if (timeLeft <= 0) endGame(true);
+            }, 1000);
+        }
+
+        function setNextWordTarget() {
+            const list = WORD_LISTS[currentLang];
+            currentTargetWord = list[Math.floor(Math.random() * list.length)];
+            typingInput.value = '';
+            renderWordDisplay();
+        }
+
+        function renderWordDisplay() {
+            const typedVal = typingInput.value;
+            let html = '';
+
+            for (let i = 0; i < currentTargetWord.length; i++) {
+                const char = currentTargetWord[i];
+                if (i < typedVal.length) {
+                    if (typedVal[i] === char) {
+                        html += `<span class="char-correct">${char}</span>`;
+                    } else {
+                        html += `<span class="char-wrong">${char}</span>`;
+                    }
+                } else {
+                    html += `<span class="char-untyped">${char}</span>`;
+                }
+            }
+            wordTargetDisplay.innerHTML = html;
+        }
+
+        typingInput.addEventListener('input', () => {
+            if (!isGameRunning) return;
+
+            const val = typingInput.value;
+            totalTypedChars++;
+
+            if (currentTargetWord.startsWith(val)) {
+                correctTypedChars++;
+                playSound('key');
+            } else {
+                combo = 0;
+                playSound('error');
+            }
+
+            renderWordDisplay();
+
+            if (val === currentTargetWord) {
+                onWordCompleted();
+            }
+
+            updateStatsUI();
+        });
+
+        function onWordCompleted() {
+            playSound('hit');
+            combo++;
+            const wordScore = currentTargetWord.length * 10 * Math.min(combo, 5);
+            score += wordScore;
+
+            if (currentMode === 'zombie') {
+                if (zombies.length > 0) {
+                    const targetZ = zombies[0];
+                    lasers.push({ x1: 60, y1: canvas.height / 2, x2: targetZ.x, y2: targetZ.y, life: 1.0 });
+                    playSound('laser');
+                    addFloatingText(`-${wordScore}`, targetZ.x, targetZ.y - 20, '#10b981');
+                    createExplosion(targetZ.x, targetZ.y, '#10b981');
+                    zombies.shift();
+                }
+                if (zombies.length < 3) spawnZombie();
+            } else if (currentMode === 'boss') {
+                if (boss) {
+                    boss.hp -= 20;
+                    boss.shake = 12;
+                    lasers.push({ x1: canvas.width * 0.2, y1: canvas.height * 0.5, x2: boss.x, y2: boss.y, life: 1.0 });
+                    playSound('laser');
+                    addFloatingText(`-${wordScore} HP`, boss.x, boss.y - 40, '#ef4444');
+                    createExplosion(boss.x, boss.y, '#ef4444');
+                    if (boss.hp <= 0) endGame(true);
+                }
+            } else {
+                addFloatingText(`+${wordScore}`, canvas.width / 2, canvas.height * 0.4, '#f59e0b');
+            }
+
+            setNextWordTarget();
+        }
+
+        function updateStatsUI() {
+            statScore.textContent = score;
+            statCombo.textContent = `${combo}x`;
+
+            const timeElapsedMin = (Date.now() - startTime) / 60000 || 0.01;
+            const wpm = Math.round((correctTypedChars / 5) / timeElapsedMin);
+            statWpm.textContent = isNaN(wpm) ? 0 : wpm;
+
+            const acc = totalTypedChars > 0 ? Math.round((correctTypedChars / totalTypedChars) * 100) : 100;
+            statAcc.textContent = `${acc}%`;
+        }
+
+        function spawnZombie() {
+            const list = WORD_LISTS[currentLang];
+            const word = list[Math.floor(Math.random() * list.length)];
+            zombies.push({
+                x: canvas.width + 40,
+                y: canvas.height * 0.5 + (Math.random() * 80 - 40),
+                speed: 0.5 + Math.random() * 0.5,
+                word: word
+            });
+        }
+
+        function createExplosion(x, y, color) {
+            for (let i = 0; i < 20; i++) {
+                particles.push({
+                    x: x, y: y,
+                    vx: (Math.random() - 0.5) * 8,
+                    vy: (Math.random() - 0.5) * 8,
+                    life: 1.0,
+                    color: color
+                });
+            }
+        }
+
+        function addFloatingText(text, x, y, color) {
+            floatingTexts.push({ text, x, y, vy: -1.5, life: 1.0, color });
+        }
+
+        // Render Loop
+        function renderLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Background Grid
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < canvas.width; i += 40) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+                ctx.stroke();
+            }
+
+            // Draw Lasers
+            for (let i = lasers.length - 1; i >= 0; i--) {
+                const l = lasers[i];
+                ctx.strokeStyle = `rgba(6, 182, 212, ${l.life})`;
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(l.x1, l.y1);
+                ctx.lineTo(l.x2, l.y2);
+                ctx.stroke();
+                l.life -= 0.1;
+                if (l.life <= 0) lasers.splice(i, 1);
+            }
+
+            // Draw Mode Visuals
+            if (currentMode === 'zombie') {
+                // Defense Base
+                ctx.fillStyle = '#06b6d4';
+                ctx.fillRect(20, canvas.height / 2 - 40, 40, 80);
+
+                zombies.forEach((z) => {
+                    if (isGameRunning) z.x -= z.speed;
+                    ctx.fillStyle = '#10b981';
+                    ctx.beginPath();
+                    ctx.arc(z.x, z.y, 18, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 15px Kantumruy Pro, Outfit';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(z.word, z.x, z.y - 25);
+
+                    if (z.x <= 60) endGame(false);
+                });
+            } else if (currentMode === 'boss' && boss) {
+                let bx = boss.x;
+                if (boss.shake > 0) {
+                    bx += (Math.random() - 0.5) * boss.shake;
+                    boss.shake *= 0.9;
+                }
+
+                ctx.fillStyle = '#ef4444';
+                ctx.beginPath();
+                ctx.arc(bx, boss.y, 60, 0, Math.PI * 2);
+                ctx.fill();
+
+                // HP Bar
+                ctx.fillStyle = '#1e293b';
+                ctx.fillRect(bx - 80, boss.y - 80, 160, 12);
+                ctx.fillStyle = '#ef4444';
+                ctx.fillRect(bx - 80, boss.y - 80, Math.max(0, (boss.hp / boss.maxHp) * 160), 12);
+            }
+
+            // Particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.life;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1.0;
+
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= 0.03;
+                if (p.life <= 0) particles.splice(i, 1);
+            }
+
+            // Floating Text FX
+            for (let i = floatingTexts.length - 1; i >= 0; i--) {
+                const ft = floatingTexts[i];
+                ctx.fillStyle = ft.color;
+                ctx.globalAlpha = ft.life;
+                ctx.font = 'bold 18px Outfit';
+                ctx.fillText(ft.text, ft.x, ft.y);
+                ctx.globalAlpha = 1.0;
+
+                ft.y += ft.vy;
+                ft.life -= 0.02;
+                if (ft.life <= 0) floatingTexts.splice(i, 1);
+            }
+
+            requestAnimationFrame(renderLoop);
+        }
+
+        function endGame(isVictory) {
+            isGameRunning = false;
+            clearInterval(timerInterval);
+            typingInput.disabled = true;
+
+            const t = TRANSLATIONS[currentLang];
+            document.getElementById('endResultTitle').textContent = isVictory ? t.victoryTitle : t.defeatTitle;
+            document.getElementById('endResultSub').textContent = isVictory ? t.victorySub : t.defeatSub;
+
+            document.getElementById('finalWpm').textContent = statWpm.textContent;
+            document.getElementById('finalAcc').textContent = statAcc.textContent;
+            document.getElementById('finalScore').textContent = statScore.textContent;
+
+            gameOverOverlay.classList.remove('hidden');
+        }
+
+        function closeGameOver() {
+            gameOverOverlay.classList.add('hidden');
+            startOverlay.classList.remove('hidden');
+        }
+
+        window.onload = function() {
+            setLanguage('en');
+            switchMode('solo');
+            renderLoop();
+        };
+    </script>
+</body>
+</html>
